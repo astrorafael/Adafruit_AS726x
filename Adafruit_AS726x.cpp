@@ -51,7 +51,7 @@ bool Adafruit_AS726x::begin(TwoWire *theWire)
 	//TODO: add support for other devices
 	if(deviceType != 0x40) return false;
 
-	enableInterrupt();
+	//enableInterrupt();
 	
 	setDrvCurrent(LIMIT_12MA5);
 	drvOff();
@@ -60,7 +60,7 @@ bool Adafruit_AS726x::begin(TwoWire *theWire)
 	
 	setGain(GAIN_64X);
 	
-	setConversionType(ONE_SHOT);
+	setConversionType(MODE_2);
 	
 	return true;
 }
@@ -309,6 +309,7 @@ float Adafruit_AS726x::readCalibratedValue(uint8_t channel)
 	return value.asFP;
 }
 
+#if 0
 void Adafruit_AS726x::write8(byte reg, byte value)
 {
 	this->write(reg, &value, 1);
@@ -321,6 +322,25 @@ uint8_t Adafruit_AS726x::read8(byte reg)
 	
 	return ret;
 }
+#else
+void Adafruit_AS726x::write8(byte reg, byte value)
+{
+	_i2c->beginTransmission((uint8_t)_i2caddr);
+	_i2c->write((uint8_t) reg);
+	_i2c->write((uint8_t) value);
+	_i2c->endTransmission();
+}
+
+uint8_t Adafruit_AS726x::read8(byte reg)
+{
+
+	_i2c->beginTransmission((uint8_t)_i2caddr);
+	_i2c->write((uint8_t) reg);
+	_i2c->endTransmission();
+	_i2c->requestFrom((uint8_t)_i2caddr, 1, 0);
+	return _i2c->read();
+}
+#endif
 
 uint8_t Adafruit_AS726x::virtualRead(uint8_t addr)
 {
@@ -375,6 +395,7 @@ void Adafruit_AS726x::virtualWrite(uint8_t addr, uint8_t value)
 	//Serial.print(" = 0x"); Serial.println(value, HEX);
 }
 
+#if 0
 void Adafruit_AS726x::read(uint8_t reg, uint8_t *buf, uint8_t num)
 {
 	//uint8_t value;
@@ -403,6 +424,7 @@ void Adafruit_AS726x::write(uint8_t reg, uint8_t *buf, uint8_t num)
 	_i2c->write((uint8_t *)buf, num);
 	_i2c->endTransmission();
 }
+#endif
 
 void Adafruit_AS726x::_i2c_init()
 {
