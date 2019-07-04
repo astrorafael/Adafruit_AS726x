@@ -337,7 +337,7 @@ uint8_t Adafruit_AS726x::read8(byte reg)
 	_i2c->beginTransmission((uint8_t)_i2caddr);
 	_i2c->write((uint8_t) reg);
 	_i2c->endTransmission();
-	_i2c->requestFrom((uint8_t)_i2caddr, 1, 0);
+	_i2c->requestFrom((uint8_t)_i2caddr, 1, false);
 	return _i2c->read();
 }
 #endif
