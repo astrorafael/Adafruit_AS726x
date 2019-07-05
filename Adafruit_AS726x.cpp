@@ -195,15 +195,6 @@ void Adafruit_AS726x::startMeasurement()
 	setConversionType(ONE_SHOT);
 }
 
-void Adafruit_AS726x::startMeasurement(uint8_t mode, uint8_t interrupt)
-{
-	_control_setup.DATA_RDY = 0;
-	_control_setup.INT      = interrupt;
-	_control_setup.BANK     = mode;
-	virtualWrite(AS726X_CONTROL_SETUP, _control_setup.get());
-}
-
-
 /**************************************************************************/
 /*! 
     @brief  read an individual raw spectral channel
@@ -223,6 +214,7 @@ uint16_t Adafruit_AS726x::readChannel(uint8_t channel)
     @param num Optional number of channels to read. Defaults to AS726x_NUM_CHANNELS
 */
 /**************************************************************************/
+#if 0
 void Adafruit_AS726x::readRawValues(uint16_t *buf, uint8_t num)
 {
 	for(int i = 0; i < num; i++){
@@ -250,6 +242,18 @@ void Adafruit_AS726x::readRawValues(uint16_t *buf, uint8_t num)
 		}
 	}
 }
+#else
+void Adafruit_AS726x::readRawValues(uint16_t *buf, uint8_t num)
+{
+    uint8_t color, i;
+    uint16_t* p;
+    // read 16 bit integers as 2 8-bit numbers  with in place reordering
+    for(i=0, p=buf, color = AS7262_VIOLET; i<num ; i++, color += 2, p++) {
+        *((uint8_t *)(p) + 1) = virtualRead(color);  
+        *(uint8_t *)(p)       = virtualRead(color+1); 
+    }
+}
+#endif
 
 /**************************************************************************/
 /*! 
@@ -258,6 +262,7 @@ void Adafruit_AS726x::readRawValues(uint16_t *buf, uint8_t num)
     @param num Optional number of channels to read. Defaults to AS726x_NUM_CHANNELS
 */
 /**************************************************************************/
+#if 0
 void Adafruit_AS726x::readCalibratedValues(float *buf, uint8_t num){
 	for(int i = 0; i < num; i++){
 		switch(i){
@@ -284,7 +289,21 @@ void Adafruit_AS726x::readCalibratedValues(float *buf, uint8_t num){
 		}
 	}
 }
+#else
+void Adafruit_AS726x::readCalibratedValues(float *buf, uint8_t num)
+{
+    uint8_t color, i;
+    float* p;
 
+    // read 32 bit floats as 4 8-bit numbers  with in place reordering
+    for(i=0, p=buf, color = AS7262_VIOLET_CALIBRATED; i<num ; i++, color += 4, p++) {
+        *((uint8_t *)(p) + 3) = virtualRead(color);
+        *((uint8_t *)(p) + 2) = virtualRead(color + 1);
+        *((uint8_t *)(p) + 1) = virtualRead(color + 2); 
+        *((uint8_t *)(p) + 0) = virtualRead(color + 3);
+    }
+}
+#endif
 
 /**************************************************************************/
 /*! 
@@ -395,7 +414,6 @@ void Adafruit_AS726x::virtualWrite(uint8_t addr, uint8_t value)
 	//Serial.print(" = 0x"); Serial.println(value, HEX);
 }
 
-#if 0
 void Adafruit_AS726x::read(uint8_t reg, uint8_t *buf, uint8_t num)
 {
 	//uint8_t value;
@@ -424,7 +442,7 @@ void Adafruit_AS726x::write(uint8_t reg, uint8_t *buf, uint8_t num)
 	_i2c->write((uint8_t *)buf, num);
 	_i2c->endTransmission();
 }
-#endif
+
 
 void Adafruit_AS726x::_i2c_init()
 {

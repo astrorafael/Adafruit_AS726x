@@ -221,8 +221,6 @@ class Adafruit_AS726x {
 		//read sensor data
 		void startMeasurement();
 
-		void startMeasurement(uint8_t mode, uint8_t interrupt=0);
-
 		/*! 
 		    @brief  Check if the sensor is ready to return data
 		    @return true if data is ready to be read, false otherwise.
